@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brokers Shell Game</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #d4a373;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        h1 { color: #e63946; text-shadow: 2px 2px #000; }
+        .game-container {
+            border: 4px solid #444;
+            padding: 50px;
+            background: #2a2a2a;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .cups-container {
+            display: flex;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        .cup {
+            width: 100px;
+            height: 120px;
+            background: #8b5a2b;
+            border-radius: 10px 10px 50px 50px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            border: 3px solid #5d3a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .cup:hover { transform: translateY(-20px); background: #a67c52; }
+        .message { margin-top: 20px; font-size: 1.2rem; min-height: 1.5em; }
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #e63946;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>BROKERS: SHELL GAME</h1>
+    <div class="game-container">
+        <p>"컵 하나를 골라라. 코인은 단 하나뿐이다."</p>
+        <div class="cups-container">
+            <div class="cup" onclick="makeChoice(0)">?</div>
+            <div class="cup" onclick="makeChoice(1)">?</div>
+            <div class="cup" onclick="makeChoice(2)">?</div>
+        </div>
+        <div class="message" id="message"></div>
+        <button class="reset-btn" onclick="resetGame()">다시 섞기</button>
+    </div>
+
+    <script>
+        let coinPos = Math.floor(Math.random() * 3);
+        let gameOver = false;
+
+        function makeChoice(clickedIdx) {
+            if (gameOver) return;
+            
+            const msgElement = document.getElementById('message');
+            if (clickedIdx === coinPos) {
+                msgElement.innerHTML = "<span style='color: #4ade80;'>승리! 코인을 찾았다. 운이 좋군.</span>";
+            } else {
+                msgElement.innerHTML = "<span style='color: #f87171;'>패배... 다음 기회는 없을지도 모른다.</span>";
+            }
+            gameOver = true;
+        }
+
+        function resetGame() {
+            coinPos = Math.floor(Math.random() * 3);
+            gameOver = false;
+            document.getElementById('message').innerText = "점원이 컵을 빠르게 섞습니다...";
+            setTimeout(() => {
+                document.getElementById('message').innerText = "자, 골라봐.";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
