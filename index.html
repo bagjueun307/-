@@ -2,244 +2,232 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Pixel Pawn Shop</title>
+    <title>Black Market Pawn Shop</title>
     <style>
         :root {
-            --bg-dark: #121212;
-            --pawn-green: #2d3e30;
-            --pawn-wood: #3e2723;
-            --pixel-border: 4px;
+            --bg-deep: #0a0a0b;
+            --desk-iron: #2c2c2e;
+            --illegal-red: #a32a2a;
         }
 
         * { image-rendering: pixelated; box-sizing: border-box; font-family: 'Courier New', monospace; }
         
         body {
             margin: 0; height: 100vh;
-            background-color: var(--bg-dark);
-            /* 도트 질감 배경 연산 */
-            background-image: 
-                linear-gradient(45deg, #1a1a1a 25%, transparent 25%), 
-                linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
-                linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
-            background-size: 4px 4px;
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(#1a1a1c 1px, transparent 1px);
+            background-size: 16px 16px;
             display: flex; flex-direction: column; align-items: center;
-            color: #d4d4d4; overflow: hidden;
+            color: #b0b0b5; overflow: hidden;
         }
 
-        /* 사장님 도트 연산 (이미지 없이 CSS로만 구현) */
-        .boss-area {
-            position: relative; width: 200px; height: 180px; margin-top: 20px;
+        /* [도트 연산] 전당포 사장님 실루엣 */
+        .pawn-window {
+            position: relative; width: 100%; height: 280px;
             background: 
-                /* 눈 */
-                radial-gradient(circle, #fff 2px, transparent 2px) 70px 60px / 20px 20px no-repeat,
-                radial-gradient(circle, #fff 2px, transparent 2px) 110px 60px / 20px 20px no-repeat,
-                /* 얼굴 */
-                linear-gradient(#5d4037, #5d4037) 60px 40px / 80px 70px no-repeat,
-                /* 몸통(코트) */
-                linear-gradient(#263238, #263238) 40px 110px / 120px 70px no-repeat;
-            filter: drop-shadow(0 0 5px #000);
+                /* 창살 */
+                linear-gradient(90deg, transparent 48%, #111 48%, #111 52%, transparent 52%) 0 0 / 120px 100% repeat-x,
+                /* 사장님 (CSS로 그린 도트 인물) */
+                radial-gradient(circle at 50% 40%, #5d4037 30px, transparent 31px) no-repeat, /* 머리 */
+                linear-gradient(#151517, #151517) 50% 60% / 100px 150px no-repeat; /* 몸통 */
+            border-bottom: 10px solid #1a1a1c;
         }
 
-        /* 작업대 (카운터) */
-        .counter {
-            width: 100%; height: 150px; background: #3e2723;
-            border-top: 8px solid #5d4037; position: absolute; bottom: 0;
-            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+        .iron-desk {
+            width: 100%; height: 100%; background: var(--desk-iron);
+            border-top: 4px solid #444; position: relative;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 감정 센터 UI */
-        .ui-panel {
-            width: 500px; background: #263238; border: 4px solid #000;
-            padding: 15px; position: relative; z-index: 10; margin-top: -10px;
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
+        /* 서류 UI */
+        .appraisal-sheet {
+            width: 460px; background: #d1d1ca; border: 4px solid #111;
+            padding: 20px; color: #111; margin-top: -70px;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.5); z-index: 50;
         }
 
-        .dialogue-box {
-            background: #000; padding: 10px; border: 2px solid #546e7a;
-            color: #81c784; font-size: 14px; min-height: 60px; margin-bottom: 10px;
-        }
+        .sheet-header { border-bottom: 2px solid #111; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; }
+        .dialogue-text { height: 45px; font-size: 14px; font-weight: bold; margin-bottom: 15px; border-left: 4px solid var(--illegal-red); padding-left: 10px; display: flex; align-items: center; }
 
-        /* 버튼 도트 스타일 */
-        .btn-group { display: flex; gap: 8px; justify-content: center; }
+        .btn-group { display: flex; gap: 10px; }
         button {
-            background: #455a64; color: #fff; border: 4px solid #000;
-            padding: 10px 15px; cursor: pointer; font-weight: bold;
-            box-shadow: inset -4px -4px 0px #263238;
+            padding: 10px 18px; border: 4px solid #111; cursor: pointer;
+            font-size: 13px; font-weight: bold; transition: 0.1s;
         }
-        button:hover { background: #546e7a; }
-        button:active { box-shadow: none; transform: translate(2px, 2px); }
-        button:disabled { background: #1a1a1a; color: #444; border-color: #000; }
+        .btn-accept { background: #4a5d4a; color: white; }
+        .btn-deny { background: #8e2424; color: white; }
+        button:active { transform: translateY(3px); }
+        button:disabled { background: #888; color: #aaa; cursor: not-allowed; }
 
         /* 야바위 구역 */
-        .game-zone {
-            position: relative; width: 600px; height: 180px; margin-top: 40px;
-            z-index: 20;
-        }
-
-        /* 도트 컵 */
+        .game-zone { position: relative; width: 600px; height: 160px; margin-top: 35px; }
         .cup {
-            position: absolute; width: 70px; height: 90px;
-            background: #795548; border: 4px solid #000;
-            border-radius: 4px 4px 15px 15px; transition: 0.3s;
+            position: absolute; width: 85px; height: 105px;
+            background: linear-gradient(to right, #34495e, #1a1a1c, #34495e);
+            border: 4px solid #111; border-radius: 4px 4px 10px 10px;
+            transition: 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
         }
-        .cup::after { /* 컵 무늬 */
-            content: ''; position: absolute; top: 10px; left: 10px;
-            width: 50px; height: 4px; background: rgba(0,0,0,0.2);
-        }
+        .lifted { transform: translateY(-75px) rotate(-10deg); }
 
-        .lifted { transform: translateY(-70px); }
-
-        /* 동전 */
         .pixel-coin {
-            position: absolute; bottom: 10px; width: 30px; height: 10px;
-            background: #ffd600; border: 2px solid #ffab00;
-            display: none; z-index: -1;
+            position: absolute; bottom: 12px; width: 36px; height: 12px;
+            background: #ffd700; border: 2px solid #b8860b; display: none; z-index: -1;
         }
 
-        /* 섞는 손 (도트 연산) */
-        #hand {
-            position: absolute; width: 60px; height: 60px;
-            background: #8d6e63; border: 3px solid #000;
-            opacity: 0; z-index: 100; pointer-events: none;
-        }
+        #balance-display { color: #2e7d32; }
     </style>
 </head>
 <body>
 
-    <div class="boss-area"></div>
+    <div class="pawn-window"></div>
 
-    <div class="ui-panel">
-        <div id="dialogue" class="dialogue-box">"입구에 '총기 반입 금지'라고 써붙였을 텐데. 뭐, 가져온 거나 보여주게."</div>
+    <div class="iron-desk">
+        <div class="appraisal-sheet">
+            <div class="sheet-header">
+                <span>ILLEGAL AUTHENTICATION</span>
+                <span id="balance-display">WALLET: 0 COINS</span>
+            </div>
+            <div id="dialogue" class="dialogue-text">"뒤에 경찰 없지? 물건이나 내놔봐."</div>
+            
+            <div id="item-info" style="display:none; border-top: 2px dashed #111; padding: 10px 0;">
+                <div style="display:flex; justify-content: space-between; font-weight: bold;">
+                    <span id="item-name" style="color:var(--illegal-red);"></span>
+                    <span id="item-val"></span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="btn-main" class="btn-accept" onclick="startAppraisal(false)">물건 감정</button>
+                <button id="btn-re" class="btn-deny" onclick="startAppraisal(true)" style="display:none;">다른 물건</button>
+            </div>
+        </div>
+
+        <div class="game-zone">
+            <div id="slot-0" class="cup" style="left: 80px;" onclick="select(0)"></div>
+            <div id="slot-1" class="cup" style="left: 260px;" onclick="select(1)"></div>
+            <div id="slot-2" class="cup" style="left: 440px;" onclick="select(2)"></div>
+            <div id="coin-actor" class="pixel-coin"></div>
+        </div>
+    </div>
+
+<script>
+    let wallet = 0;
+    let playing = false;
+    let finished = true;
+    let coinPos = 1;
+    let currentVal = 0;
+
+    const items = [
+        { n: "장물 다이아", v: 5, m: "오... 빛깔 좋군. 이 정도면 판을 벌릴만 해." },
+        { n: "밀수 금괴", v: 4, m: "묵직하군. 제대로 눈 크게 뜨고 보라고." },
+        { n: "암시장 칩", v: 3, m: "정보가 가득 들었군. 어디 숨겼는지 맞춰봐." },
+        { n: "명품 시계", v: 2, m: "시간이 금이지. 자, 섞는다!" },
+        { n: "은수저", v: 1, m: "이런 짜질구레한 건 연습용으로 딱이지." }
+    ];
+
+    function startAppraisal(isRetry) {
+        if(playing) return;
+        const diag = document.getElementById('dialogue');
+        const btnMain = document.getElementById('btn-main');
+        const btnRe = document.getElementById('btn-re');
+
+        btnMain.disabled = btnRe.disabled = true;
+        diag.innerText = isRetry ? "흥, 그거보다 나은 게 있다고? (감정 중...)" : "어디 보자... (장갑을 끼며)";
+
+        setTimeout(() => {
+            const item = items[Math.floor(Math.random() * items.length)];
+            currentVal = item.v;
+
+            document.getElementById('item-info').style.display = 'block';
+            document.getElementById('item-name').innerText = `[${item.n}]`;
+            document.getElementById('item-val').innerText = `VALUE: ${item.v}`;
+            diag.innerText = `"${item.m}"`;
+
+            btnMain.disabled = btnRe.disabled = false;
+            btnMain.innerText = "야바위 수락";
+            btnMain.onclick = startShuffle;
+            btnRe.style.display = 'inline-block';
+        }, 1000);
+    }
+
+    function startShuffle() {
+        playing = true; finished = false;
+        document.getElementById('btn-main').disabled = true;
+        document.getElementById('btn-re').disabled = true;
         
-        <div id="item-info" style="display:none; margin-bottom: 10px; text-align: center;">
-            <span id="item-name" style="color:#ffeb3b; font-weight: bold;"></span>
-            <span id="item-reward" style="margin-left:10px; color:#f44336;"></span>
-        </div>
+        coinPos = Math.floor(Math.random()*3);
+        const coin = document.getElementById('coin-actor');
+        const cups = document.querySelectorAll('.cup');
+        
+        // 코인 위치 보여주기
+        cups[coinPos].classList.add('lifted');
+        coin.style.display = 'block';
+        coin.style.left = (parseInt(cups[coinPos].style.left) + 24) + "px";
 
-        <div class="btn-group">
-            <button id="btn-re" onclick="appraise(true)" style="display:none;">다른 물건 감정</button>
-            <button id="btn-main" onclick="appraise(false)">물건 꺼내기</button>
-        </div>
-    </div>
+        setTimeout(() => {
+            cups[coinPos].classList.remove('lifted');
+            coin.style.display = 'none';
+            
+            // 승률 조절: 셔플 횟수를 7회로 줄이고, 속도를 완화함
+            const speed = [0, 0.6, 0.5, 0.45, 0.4, 0.35][currentVal];
+            performShuffle(0, 7, speed);
+        }, 1200);
+    }
 
-    <div class="game-zone">
-        <div id="hand"></div>
-        <div id="slot-0" class="cup" style="left: 100px;" onclick="select(0)"></div>
-        <div id="slot-1" class="cup" style="left: 265px;" onclick="select(1)"></div>
-        <div id="slot-2" class="cup" style="left: 430px;" onclick="select(2)"></div>
-        <div id="coin-anchor" class="pixel-coin"></div>
-    </div>
-
-    <div class="counter"></div>
-
-    <script>
-        let coins = 0;
-        let playing = false;
-        let coinPos = 1;
-        let rewards = 0;
-
-        const items = [
-            { n: "녹슨 칼날", v: 1, m: "어디 고철상에서 주워왔나?" },
-            { n: "피 묻은 훈장", v: 2, m: "사연 있어 보이는군. 받아주지." },
-            { n: "정체불명의 칩", v: 3, m: "산나비 놈들 건가? 위험해 보이는데." },
-            { n: "황금 이빨", v: 4, m: "깨끗하게 닦아두길 잘했군." },
-            { n: "블루프린트", v: 5, m: "이건...! 기밀 문서 아닌가? 대단하군!" }
-        ];
-
-        function appraise(isRetry) {
-            if(playing) return;
-            const btnMain = document.getElementById('btn-main');
-            const btnRe = document.getElementById('btn-re');
-            const diag = document.getElementById('dialogue');
-
-            btnMain.disabled = btnRe.disabled = true;
-            diag.innerText = isRetry ? "...다시 보는 중이다. 기다려." : "흠... 돋보기를 어디 뒀더라...";
-
-            setTimeout(() => {
-                const item = items[Math.floor(Math.random()*items.length)];
-                rewards = item.v;
-                
-                document.getElementById('item-info').style.display = 'block';
-                document.getElementById('item-name').innerText = item.n;
-                document.getElementById('item-reward').innerText = `[보상: ${rewards} 코인]`;
-                diag.innerText = `"${item.m}"`;
-
-                btnMain.disabled = btnRe.disabled = false;
-                btnMain.innerText = "야바위 수락";
-                btnMain.onclick = startShuffle;
-                btnRe.style.display = 'inline-block';
-            }, 1200);
+    function performShuffle(count, total, speed) {
+        if(count >= total) {
+            playing = false;
+            document.getElementById('dialogue').innerText = "자, 어느 쪽이지? 선택해.";
+            return;
         }
 
-        function startShuffle() {
-            playing = true;
-            document.getElementById('btn-main').disabled = true;
-            document.getElementById('btn-re').disabled = true;
-            
-            coinPos = Math.floor(Math.random()*3);
-            const coin = document.getElementById('coin-anchor');
-            const cups = document.querySelectorAll('.cup');
-            
-            // 코인 위치 보여주기
-            cups[coinPos].classList.add('lifted');
+        let a = Math.floor(Math.random()*3);
+        let b = Math.floor(Math.random()*3);
+        while(a === b) b = Math.floor(Math.random()*3);
+
+        const cupA = document.getElementById(`slot-${a}`);
+        const cupB = document.getElementById(`slot-${b}`);
+        const tempLeft = cupA.style.left;
+
+        cupA.style.transition = cupB.style.transition = `${speed}s ease-in-out`;
+        cupA.style.left = cupB.style.left;
+        cupB.style.left = tempLeft;
+
+        if(coinPos === a) coinPos = b;
+        else if(coinPos === b) coinPos = a;
+
+        setTimeout(() => performShuffle(count + 1, total, speed), speed * 1050);
+    }
+
+    function select(id) {
+        if(playing || finished) return;
+        finished = true;
+        const cups = document.querySelectorAll('.cup');
+        const coin = document.getElementById('coin-actor');
+        
+        cups[id].classList.add('lifted');
+        if(id === coinPos) {
             coin.style.display = 'block';
-            coin.style.left = (parseInt(cups[coinPos].style.left) + 20) + "px";
-
-            setTimeout(() => {
-                cups[coinPos].classList.remove('lifted');
-                coin.style.display = 'none';
-                
-                // 난이도별 속도 (1코인: 0.65s ~ 5코인: 0.28s)
-                const speed = [0, 0.65, 0.55, 0.45, 0.35, 0.28][rewards];
-                performShuffle(0, speed);
-            }, 1000);
+            coin.style.left = (parseInt(cups[id].style.left) + 24) + "px";
+            wallet += currentVal;
+            document.getElementById('dialogue').innerText = "호오, 제법인데? 여기 약속한 코인이다.";
+        } else {
+            document.getElementById('dialogue').innerText = "땡! 이건 내 거야. 불만 있으면 경찰을 부르든가.";
+            setTimeout(() => cups[coinPos].classList.add('lifted'), 500);
         }
 
-        function performShuffle(count, speed) {
-            if(count >= 12) {
-                playing = false;
-                document.getElementById('dialogue').innerText = "자... 어느 쪽이지? 틀리면 국물도 없어.";
-                return;
-            }
+        document.getElementById('balance-display').innerText = `WALLET: ${wallet} COINS`;
 
-            let a = Math.floor(Math.random()*3);
-            let b = Math.floor(Math.random()*3);
-            while(a === b) b = Math.floor(Math.random()*3);
-
-            const cupA = document.getElementById(`slot-${a}`);
-            const cupB = document.getElementById(`slot-${b}`);
-            const tempLeft = cupA.style.left;
-
-            cupA.style.transition = cupB.style.transition = `${speed}s ease-in-out`;
-            cupA.style.left = cupB.style.left;
-            cupB.style.left = tempLeft;
-
-            if(coinPos === a) coinPos = b;
-            else if(coinPos === b) coinPos = a;
-
-            setTimeout(() => performShuffle(count + 1, speed), speed * 1100);
-        }
-
-        function select(id) {
-            if(playing) return;
-            const cups = document.querySelectorAll('.cup');
-            const coin = document.getElementById('coin-anchor');
-            
-            cups[id].classList.add('lifted');
-            if(id === coinPos) {
-                coin.style.display = 'block';
-                coin.style.left = (parseInt(cups[id].style.left) + 20) + "px";
-                document.getElementById('dialogue').innerText = "운이 좋군. 여기 코인 가져가게.";
-            } else {
-                document.getElementById('dialogue').innerText = "틀렸어. 이건 내 거다.";
-                setTimeout(() => cups[coinPos].classList.add('lifted'), 500);
-            }
-
-            setTimeout(() => {
-                location.reload(); // 단순화를 위해 리로드 처리 (실제로는 상태초기화 함수 호출)
-            }, 2500);
-        }
-    </script>
+        setTimeout(() => {
+            document.getElementById('item-info').style.display = 'none';
+            document.getElementById('btn-re').style.display = 'none';
+            document.getElementById('btn-main').disabled = false;
+            document.getElementById('btn-main').innerText = "다른 물건 꺼내기";
+            document.getElementById('btn-main').onclick = () => startAppraisal(false);
+            cups.forEach(c => c.classList.remove('lifted'));
+            coin.style.display = 'none';
+        }, 2500);
+    }
+</script>
 </body>
 </html>
