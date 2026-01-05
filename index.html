@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Secret Pawn Shop - Hand Shuffle</title>
+    <title>The Secret Pawn Shop - Adjusted Difficulty</title>
     <style>
         * { image-rendering: pixelated; box-sizing: border-box; cursor: crosshair; }
         body {
@@ -15,40 +15,37 @@
             overflow: hidden;
         }
 
-        /* UI 레이아웃 */
         .top-bar { width: 100%; padding: 20px; }
-        .wallet { background: rgba(0,0,0,0.8); border: 3px solid #5d3a1a; padding: 10px 20px; display: inline-block; }
+        .wallet { background: rgba(0,0,0,0.85); border: 3px solid #5d3a1a; padding: 10px 20px; display: inline-block; box-shadow: 4px 4px 0px #000; }
         
         .appraisal-center {
-            width: 450px; background: rgba(15, 15, 15, 0.95);
+            width: 460px; background: rgba(15, 15, 15, 0.95);
             border: 4px solid #5d3a1a; padding: 15px; text-align: center;
             z-index: 100; margin-top: 10px;
         }
 
-        .item-visual { width: 64px; height: 64px; margin: 10px auto; background: #222; border: 2px solid #333; }
-        .item-visual img { width: 100%; height: 100%; }
+        .item-visual { width: 64px; height: 64px; margin: 10px auto; background: #222; border: 2px solid #333; display: flex; align-items: center; justify-content: center; }
+        .item-visual img { width: 50px; height: 50px; }
 
-        /* 야바위 구역 */
-        .game-area { position: relative; width: 600px; height: 250px; margin-top: 40px; }
+        .game-area { position: relative; width: 600px; height: 250px; margin-top: 30px; }
         
         /* 사장의 손 */
         #dealer-hand {
-            position: absolute; width: 120px; height: 120px;
+            position: absolute; width: 130px; height: 130px;
             background: url('hand.png') no-repeat center center;
             background-size: contain;
             z-index: 10; pointer-events: none;
-            transition: all 0.5s ease-in-out; /* 섞는 속도 조절용 */
-            opacity: 0; transform: translateY(-50px);
+            opacity: 0; transform: translateY(-30px);
         }
 
-        .cup-slot { position: absolute; width: 90px; height: 110px; display: flex; justify-content: center; align-items: flex-end; transition: left 0.5s ease-in-out; }
-        .cup-pixel { width: 70px; height: 90px; background: #8b5a2b; border: 4px solid #3e2712; border-radius: 8px 8px 25px 25px; z-index: 2; transition: transform 0.4s; position: relative; }
-        .cup-pixel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #a67c52; border-bottom: 2px solid #3e2712; }
+        .cup-slot { position: absolute; width: 100px; height: 120px; display: flex; justify-content: center; align-items: flex-end; }
+        .cup-pixel { width: 80px; height: 100px; background: #8b5a2b; border: 4px solid #3e2712; border-radius: 10px 10px 30px 30px; z-index: 2; transition: transform 0.3s ease-out; position: relative; }
+        .cup-pixel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: #a67c52; border-bottom: 3px solid #3e2712; }
         
-        .lifted .cup-pixel { transform: translateY(-70px) rotate(-10deg); }
-        .coin-stack { position: absolute; bottom: 8px; display: none; z-index: 1; }
+        .lifted .cup-pixel { transform: translateY(-80px) rotate(-15deg); }
+        .coin-stack { position: absolute; bottom: 10px; display: none; z-index: 1; }
         .coin-stack.visible { display: flex; }
-        .dot-coin { width: 30px; height: 8px; background: #ffd700; border: 2px solid #b8860b; }
+        .dot-coin { width: 34px; height: 10px; background: #ffd700; border: 2px solid #b8860b; border-radius: 3px; }
 
         button { background: #e63946; color: white; border: none; padding: 12px 25px; font-family: inherit; font-weight: bold; cursor: pointer; border-bottom: 4px solid #9d2630; margin-top: 10px; }
         button:disabled { background: #333; color: #666; border-bottom: none; }
@@ -64,11 +61,11 @@
     </div>
 
     <div class="appraisal-center">
-        <div id="dialogue">"명품 분실물을 주웠다고? 어디 좀 보세..."</div>
+        <div id="dialogue">"명품 감정 시작하겠네. 물건을 올려두게."</div>
         <div id="item-area" style="display:none;">
             <div class="item-visual"><img id="item-icon" src=""></div>
-            <div id="item-name" style="font-size: 1.1rem;"></div>
-            <div id="bet-details" style="color: #ffd700; font-size: 0.8rem; margin-top: 5px;"></div>
+            <div id="item-name" style="font-size: 1.1rem; color: #4ade80;"></div>
+            <div id="bet-details" style="color: #ffd700; font-size: 0.85rem; margin-top: 5px; font-weight: bold;"></div>
         </div>
         <button id="main-btn" onclick="appraise()">물건 꺼내기</button>
     </div>
@@ -79,11 +76,11 @@
             <div class="cup-pixel"></div>
             <div id="coins-0" class="coin-stack"><div class="dot-coin"></div></div>
         </div>
-        <div class="cup-slot" id="slot-1" style="left: 255px;" onclick="select(1)">
+        <div class="cup-slot" id="slot-1" style="left: 250px;" onclick="select(1)">
             <div class="cup-pixel"></div>
             <div id="coins-1" class="coin-stack"><div class="dot-coin"></div></div>
         </div>
-        <div class="cup-slot" id="slot-2" style="left: 430px;" onclick="select(2)">
+        <div class="cup-slot" id="slot-2" style="left: 420px;" onclick="select(2)">
             <div class="cup-pixel"></div>
             <div id="coins-2" class="coin-stack"><div class="dot-coin"></div></div>
         </div>
@@ -95,28 +92,37 @@
     let finished = true;
     let coinPos = 1;
     let rewards = { win: 0 };
-    let shuffleSpeed = 0.6; // 기본 속도
+    let currentSpeed = 0.6; 
 
     const items = [
-        { name: "낡은 롤렉스", min: 1, max: 2, img: "rolex.png", msg: "흠, 세월의 흔적이 느껴지는군." },
-        { name: "은도금 반지", min: 2, max: 3, img: "ring.png", msg: "이 정도면 나쁘지 않은 가치야." },
-        { name: "명품 선글라스", rarity: "LEG", min: 4, max: 5, img: "glasses.png", msg: "오...! 이건 정말 귀한 물건인데?" }
+        { name: "낡은 펜치", val: 1, img: "pliers.png", msg: "이걸 어따 써? 1코인이나 받아가." },
+        { name: "은도금 반지", val: 2, img: "ring.png", msg: "은 함량이 낮아. 섞는 건 대충 하지." },
+        { name: "낡은 롤렉스", val: 3, img: "rolex.png", msg: "오... 태엽이 살아있군. 제법이야." },
+        { name: "명품 가죽 지갑", val: 4, img: "wallet.png", msg: "가죽 상태가 좋아. 집중해야 할 거야." },
+        { name: "다이아몬드 반지", val: 5, img: "diamond.png", msg: "이건 진짜군! 내 실력을 보여주마!" }
     ];
 
     function appraise() {
         const item = items[Math.floor(Math.random() * items.length)];
-        rewards.win = Math.floor(Math.random() * (item.max - item.min + 1)) + item.min;
-        
-        // 난이도 조절: 코인이 높을수록 섞는 속도가 빨라짐
-        shuffleSpeed = rewards.win >= 4 ? 0.35 : 0.6;
+        rewards.win = item.val;
+
+        // 🎯 너무 빠르지 않게 재조정된 속도 (단위: 초)
+        const speeds = {
+            1: 0.9,   // 아주 느림 (여유)
+            2: 0.75,  // 느림
+            3: 0.6,   // 보통
+            4: 0.45,  // 조금 빠름
+            5: 0.35   // 빠름 (집중하면 보이는 정도)
+        };
+        currentSpeed = speeds[rewards.win];
 
         document.getElementById('item-area').style.display = 'block';
         document.getElementById('item-icon').src = item.img;
         document.getElementById('item-name').innerText = item.name;
         document.getElementById('dialogue').innerText = `"${item.msg}"`;
-        document.getElementById('bet-details').innerText = `성공 시 보상: ${rewards.win} COINS`;
+        document.getElementById('bet-details').innerText = `성공: ${rewards.win} COINS / 실패: 1 COIN`;
         
-        document.getElementById('main-btn').innerText = "야바위 시작";
+        document.getElementById('main-btn').innerText = "야바위 수락";
         document.getElementById('main-btn').onclick = startShuffle;
     }
 
@@ -125,7 +131,6 @@
         document.getElementById('main-btn').disabled = true;
         const hand = document.getElementById('dealer-hand');
 
-        // 코인 위치 공개
         coinPos = Math.floor(Math.random() * 3);
         document.querySelectorAll('.coin-stack').forEach(s => s.classList.remove('visible'));
         document.querySelectorAll('.cup-slot').forEach(s => s.classList.remove('lifted'));
@@ -138,8 +143,9 @@
                 document.getElementById(`slot-${coinPos}`).classList.remove('lifted');
                 document.getElementById(`coins-${coinPos}`).classList.remove('visible');
                 
-                // 손 등장 및 섞기 시작
                 hand.style.opacity = "1";
+                // 손 이동 애니메이션 속도 싱크
+                hand.style.transition = `all ${currentSpeed}s ease-in-out`;
                 performShuffle(0);
             }, 1000);
         }, 500);
@@ -147,10 +153,12 @@
 
     function performShuffle(count) {
         const hand = document.getElementById('dealer-hand');
-        if (count >= 10) {
+        const shuffleLimit = 10; // 섞는 횟수
+
+        if (count >= shuffleLimit) {
             hand.style.opacity = "0";
             playing = false;
-            document.getElementById('dialogue').innerText = "자, 내 손은 눈보다 빠르지. 어디 있나?";
+            document.getElementById('dialogue').innerText = "자, 골라보게. 어디에 숨었을까?";
             return;
         }
 
@@ -161,26 +169,27 @@
         const slotA = document.getElementById(`slot-${a}`);
         const slotB = document.getElementById(`slot-${b}`);
         
-        // 난이도에 따른 애니메이션 속도 적용
-        slotA.style.transition = `left ${shuffleSpeed}s ease-in-out`;
-        slotB.style.transition = `left ${shuffleSpeed}s ease-in-out`;
-        hand.style.transition = `all ${shuffleSpeed}s ease-in-out`;
+        slotA.style.transition = `left ${currentSpeed}s ease-in-out`;
+        slotB.style.transition = `left ${currentSpeed}s ease-in-out`;
 
-        // 손이 컵 A로 이동 후 B와 교체하는 연출
+        // 손이 먼저 첫 번째 컵으로 이동
         hand.style.left = slotA.style.left;
-        hand.style.top = "50px";
+        hand.style.top = "40px";
 
         setTimeout(() => {
             const tempLeft = slotA.style.left;
             slotA.style.left = slotB.style.left;
             slotB.style.left = tempLeft;
-            hand.style.left = slotB.style.left; // 손이 컵과 함께 이동
+            
+            // 컵이 이동할 때 손도 같이 이동
+            hand.style.left = slotB.style.left; 
 
             if (coinPos === a) coinPos = b;
             else if (coinPos === b) coinPos = a;
 
-            setTimeout(() => performShuffle(count + 1), shuffleSpeed * 1000);
-        }, shuffleSpeed * 500);
+            // 다음 셔플까지의 간격을 속도에 맞춰 동적으로 계산
+            setTimeout(() => performShuffle(count + 1), currentSpeed * 1050);
+        }, currentSpeed * 200); // 컵 이동 시작 전 손이 위치 잡는 시간
     }
 
     function select(id) {
@@ -191,15 +200,18 @@
         if (id === coinPos) {
             document.getElementById(`coins-${id}`).classList.add('visible');
             coins += rewards.win;
-            document.getElementById('dialogue').innerText = `"제대로 봤군! 여기 ${rewards.win}코인 주지."`;
+            document.getElementById('dialogue').innerText = `"정확해. 약속한 ${rewards.win}코인이지."`;
         } else {
             coins += 1;
-            document.getElementById('dialogue').innerText = `"틀렸어! 이건 짝퉁이니 1코인만 가져가게."`;
-            setTimeout(() => document.getElementById(`slot-${coinPos}`).classList.add('lifted'), 500);
+            document.getElementById('dialogue').innerText = `"틀렸어. 1코인만 줄 테니 나가보게."`;
+            setTimeout(() => {
+                document.getElementById(`slot-${coinPos}`).classList.add('lifted');
+                document.getElementById(`coins-${coinPos}`).classList.add('visible');
+            }, 500);
         }
         document.getElementById('balance').innerText = `${coins} COINS`;
         document.getElementById('main-btn').disabled = false;
-        document.getElementById('main-btn').innerText = "다음 물건 꺼내기";
+        document.getElementById('main-btn').innerText = "다른 물건 꺼내기";
         document.getElementById('main-btn').onclick = appraise;
     }
 </script>
