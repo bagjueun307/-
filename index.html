@@ -3,150 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brokers Shell Game - Live</title>
+    <title>Brokers High-Stakes Shell Game</title>
     <style>
         :root { --bg: #1a1a1a; --accent: #e63946; --cup-color: #8b5a2b; }
         body { background: var(--bg); color: #d4a373; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        
-        .game-box { border: 4px solid #444; padding: 40px; background: #2a2a2a; text-align: center; position: relative; width: 500px; }
-        
-        /* 컵 컨테이너 */
-        .cups-wrapper { display: flex; justify-content: space-around; height: 180px; align-items: flex-end; position: relative; margin: 30px 0; }
-        
-        .cup-slot { width: 100px; position: relative; transition: transform 0.5s ease-in-out; }
-        
+        .game-box { border: 4px solid #444; padding: 40px; background: #2a2a2a; text-align: center; width: 550px; }
+        .cups-wrapper { display: flex; justify-content: space-around; height: 200px; align-items: flex-end; position: relative; margin: 30px 0; }
+        .cup-slot { width: 100px; position: relative; transition: transform 0.4s ease-in-out; }
         .cup { 
             width: 100px; height: 120px; background: var(--cup-color); border-radius: 10px 10px 40px 40px; 
             border: 3px solid #5d3a1a; cursor: pointer; position: relative; z-index: 2;
             transition: transform 0.4s, background 0.3s;
         }
-
-        /* 컵 뒤집기 효과 */
-        .cup.lifted { transform: translateY(-50px) rotate(-15deg); background: #a67c52; }
-        
-        /* 코인 스타일 */
-        .coin { 
-            width: 40px; height: 40px; background: #ffd700; border-radius: 50%; 
-            position: absolute; bottom: 10px; left: 30px; z-index: 1;
-            box-shadow: 0 0 10px #ffaa00; display: none;
+        .cup.lifted { transform: translateY(-70px) rotate(-10deg); }
+        .coin-stack { 
+            position: absolute; bottom: 15px; left: 0; right: 0; margin: auto;
+            z-index: 1; display: none; flex-direction: column-reverse; align-items: center;
         }
-        .coin.visible { display: block; }
-
-        .message { font-size: 1.1rem; height: 50px; margin-top: 20px; color: #eee; }
-        .controls { margin-top: 20px; }
-        button { padding: 10px 20px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
-        button:disabled { background: #555; cursor: not-allowed; }
+        .coin-stack.visible { display: flex; }
+        .mini-coin { 
+            width: 40px; height: 10px; background: #ffd700; border-radius: 5px; 
+            border: 1px solid #b8860b; margin-bottom: -5px; box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .message { font-size: 1.2rem; height: 60px; margin-top: 20px; color: #eee; font-weight: bold; }
+        button { padding: 12px 24px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: inherit; font-size: 1rem; }
+        button:disabled { background: #555; }
     </style>
 </head>
 <body>
 
-    <h1 style="color: var(--accent); text-shadow: 2px 2px #000;">BROKERS: SHUFFLE</h1>
+    <h1 style="color: var(--accent); text-shadow: 2px 2px #000;">💰 HIGH-STAKES YABAWI</h1>
     <div class="game-box">
-        <p id="sub-msg">"눈 크게 뜨고 잘 봐라..."</p>
+        <p id="sub-msg">"돈이 어디로 가는지 똑똑히 봐라..."</p>
         <div class="cups-wrapper" id="stage">
             <div class="cup-slot" id="slot-0" onclick="reveal(0)">
                 <div class="cup" id="cup-0"></div>
-                <div class="coin" id="coin-0"></div>
+                <div class="coin-stack" id="coins-0"></div>
             </div>
             <div class="cup-slot" id="slot-1" onclick="reveal(1)">
                 <div class="cup" id="cup-1"></div>
-                <div class="coin" id="coin-1"></div>
+                <div class="coin-stack" id="coins-1"></div>
             </div>
             <div class="cup-slot" id="slot-2" onclick="reveal(2)">
                 <div class="cup" id="cup-2"></div>
-                <div class="coin" id="coin-2"></div>
+                <div class="coin-stack" id="coins-2"></div>
             </div>
         </div>
-        <div class="message" id="status">판돈을 걸겠나?</div>
-        <div class="controls">
-            <button id="start-btn" onclick="shuffleGame()">컵 섞기 시작</button>
-        </div>
+        <div class="message" id="status">판돈을 걸 준비가 되었나?</div>
+        <button id="start-btn" onclick="prepareGame()">게임 시작</button>
     </div>
 
     <script>
-        let coinPos = 1; 
-        let isShuffling = false;
+        let coinPos = 1;
+        let coinCount = 0;
+        let isActive = false;
         let isGameOver = true;
 
-        function shuffleGame() {
-            if (isShuffling) return;
-            
-            // 초기화
-            isShuffling = true;
+        function prepareGame() {
+            if (isActive) return;
+            isActive = true;
             isGameOver = false;
-            document.querySelectorAll('.cup').forEach(c => c.classList.remove('lifted'));
-            document.querySelectorAll('.coin').forEach(c => c.classList.remove('visible'));
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('status').innerText = "섞는 중... 놓치지 마라!";
 
+            // 1. 랜덤 코인 개수 설정 (2~5개)
+            coinCount = Math.floor(Math.random() * 4) + 2;
+            coinPos = Math.floor(Math.random() * 3);
+
+            // 2. 초기화 및 코인 생성
+            document.querySelectorAll('.cup').forEach(c => c.classList.remove('lifted'));
+            document.querySelectorAll('.coin-stack').forEach(s => {
+                s.classList.remove('visible');
+                s.innerHTML = '';
+            });
+            document.getElementById('start-btn').disabled = true;
+
+            const targetStack = document.getElementById(`coins-${coinPos}`);
+            for(let i=0; i<coinCount; i++) {
+                const c = document.createElement('div');
+                c.className = 'mini-coin';
+                targetStack.appendChild(c);
+            }
+
+            // 3. 처음에 어디 있는지 보여주기
+            document.getElementById('status').innerText = `여기에 ${coinCount}코인을 넣었다. 잘 봐라!`;
+            targetStack.classList.add('visible');
+            document.getElementById(`cup-${coinPos}`).classList.add('lifted');
+
+            setTimeout(() => {
+                document.getElementById(`cup-${coinPos}`).classList.remove('lifted');
+                setTimeout(shuffleGame, 800);
+            }, 1500);
+        }
+
+        function shuffleGame() {
+            document.getElementById('status').innerText = "섞는다! 눈 떼지 마라!";
             let shuffles = 0;
-            const maxShuffles = 10; // 섞는 횟수
+            const maxShuffles = 12;
 
             const interval = setInterval(() => {
                 const s1 = Math.floor(Math.random() * 3);
-                const s2 = Math.floor(Math.random() * 3);
-                if (s1 !== s2) {
-                    swapSlots(s1, s2);
-                }
-                shuffles++;
+                let s2 = Math.floor(Math.random() * 3);
+                while(s1 === s2) s2 = Math.floor(Math.random() * 3);
+                
+                visualSwap(s1, s2);
+                
+                if (coinPos === s1) coinPos = s2;
+                else if (coinPos === s2) coinPos = s1;
 
+                shuffles++;
                 if (shuffles >= maxShuffles) {
                     clearInterval(interval);
-                    isShuffling = false;
-                    document.getElementById('status').innerText = "자, 코인은 어디에 있지?";
+                    isActive = false;
+                    document.getElementById('status').innerText = "자, 골라봐. 어디에 있지?";
                 }
-            }, 400); // 섞는 속도
+            }, 450);
         }
 
-        function swapSlots(idx1, idx2) {
-            const slot1 = document.getElementById(`slot-${idx1}`);
-            const slot2 = document.getElementById(`slot-${idx2}`);
+        function visualSwap(i, j) {
+            const slot1 = document.getElementById(`slot-${i}`);
+            const slot2 = document.getElementById(`slot-${j}`);
+            const diff = (j - i) * 150;
             
-            // 실제 위치 이동 (간단한 시각적 교차)
-            const tempX = (idx2 - idx1) * 140; 
-            slot1.style.transform = `translateX(${tempX}px)`;
-            slot2.style.transform = `translateX(${-tempX}px)`;
+            slot1.style.transform = `translateX(${diff}px)`;
+            slot2.style.transform = `translateX(${-diff}px)`;
 
-            // 0.3초 후 데이터 및 실제 DOM 순서 변경 없이 위치값만 초기화(눈속임)
             setTimeout(() => {
                 slot1.style.transition = 'none';
                 slot2.style.transition = 'none';
+                
+                // 실제 위치를 바꾸는 대신 시각적 효과만 유지
+                // (이 로직은 간단한 구현을 위해 시각적 swap 후 초기화 방식을 사용합니다)
+                // 실제 운영 시에는 DOM 요소의 ID나 순서를 교체하는 것이 더 정확합니다.
+                
+                // 코인 스택의 가시성 데이터를 업데이트
+                const stackI = document.getElementById(`coins-${i}`).innerHTML;
+                const stackJ = document.getElementById(`coins-${j}`).innerHTML;
+                document.getElementById(`coins-${i}`).innerHTML = stackJ;
+                document.getElementById(`coins-${j}`).innerHTML = stackI;
+                
+                const visibleI = document.getElementById(`coins-${i}`).classList.contains('visible');
+                const visibleJ = document.getElementById(`coins-${j}`).classList.contains('visible');
+                
+                if(visibleI) { document.getElementById(`coins-${i}`).classList.remove('visible'); document.getElementById(`coins-${j}`).classList.add('visible'); }
+                else if(visibleJ) { document.getElementById(`coins-${j}`).classList.remove('visible'); document.getElementById(`coins-${i}`).classList.add('visible'); }
+
                 slot1.style.transform = '';
                 slot2.style.transform = '';
-                
-                // 코인 위치 추적 로직 (간략화)
-                if (coinPos === idx1) coinPos = idx2;
-                else if (coinPos === idx2) coinPos = idx1;
-
                 setTimeout(() => {
-                    slot1.style.transition = 'transform 0.3s ease-in-out';
-                    slot2.style.transition = 'transform 0.3s ease-in-out';
+                    slot1.style.transition = 'transform 0.4s ease-in-out';
+                    slot2.style.transition = 'transform 0.4s ease-in-out';
                 }, 50);
-            }, 300);
+            }, 400);
         }
 
-        function reveal(clickedIdx) {
-            if (isShuffling || isGameOver) return;
-
+        function reveal(idx) {
+            if (isActive || isGameOver) return;
             isGameOver = true;
-            const clickedCup = document.getElementById(`cup-${clickedIdx}`);
-            const targetCoin = document.getElementById(`coin-${coinPos}`);
 
-            // 모든 코인 위치 파악 후 결과 공개
-            targetCoin.classList.add('visible');
-            clickedCup.classList.add('lifted');
+            document.getElementById(`cup-${idx}`).classList.add('lifted');
+            const targetStack = document.getElementById(`coins-${idx}`);
+            targetStack.classList.add('visible');
 
-            if (clickedIdx === coinPos) {
-                document.getElementById('status').innerHTML = "<span style='color:#4ade80'>정답! 운이 좋군. 코인을 가져가라.</span>";
+            if (idx === coinPos) {
+                document.getElementById('status').innerHTML = `<span style="color:#4ade80">축하한다! ${coinCount}코인을 획득했다!</span>`;
             } else {
-                document.getElementById('status').innerHTML = "<span style='color:#f87171'>꽝! 역시 넌 안되는구나.</span>";
-                // 실제 코인이 어디 있었는지 살짝 보여줌
-                setTimeout(() => {
-                    document.getElementById(`cup-${coinPos}`).classList.add('lifted');
-                }, 500);
+                document.getElementById('status').innerHTML = `<span style="color:#f87171">꽝이다. 코인은 다른 곳에 있었어.</span>`;
+                document.getElementById(`cup-${coinPos}`).classList.add('lifted');
+                document.getElementById(`coins-${coinPos}`).classList.add('visible');
             }
             document.getElementById('start-btn').disabled = false;
-            document.getElementById('start-btn').innerText = "한 판 더?";
+            document.getElementById('start-btn').innerText = "재도전 하기";
         }
     </script>
 </body>
