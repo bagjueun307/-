@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Black Market Pawn Shop - Precision Dice</title>
+    <title>Black Market Pawn Shop - Real Edition</title>
     <style>
         :root { 
             --gold: #ffd700; --legendary: #ff8000; --epic: #a335ee; 
@@ -16,80 +16,90 @@
             background-size: cover; display: flex; flex-direction: column; align-items: center; overflow: hidden;
         }
 
+        /* UI 박스: 높이를 낮추어 자판 가림 방지 */
         .ui-container {
-            position: absolute; top: 50px; width: 650px;
-            background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(8px);
+            position: absolute; top: 30px; width: 650px;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
             border: 5px solid #222; padding: 20px; color: #111;
             box-shadow: 15px 15px 0px rgba(0,0,0,0.5); z-index: 100; border-radius: 12px;
         }
 
         .balance-badge {
-            position: absolute; top: -20px; right: -20px;
-            background: #222; color: var(--gold); padding: 10px 20px;
-            border: 4px solid var(--gold); font-size: 24px; font-weight: 900;
-            box-shadow: 5px 5px 0px rgba(0,0,0,0.3); transform: rotate(2deg);
+            position: absolute; top: -15px; right: -15px;
+            background: #222; color: var(--gold); padding: 8px 18px;
+            border: 4px solid var(--gold); font-size: 22px; font-weight: 900;
         }
 
-        #dialogue { font-size: 20px; font-weight: 700; min-height: 50px; margin-bottom: 15px; border-bottom: 2px dashed #999; padding-bottom: 10px; }
+        #dialogue { font-size: 20px; font-weight: 700; min-height: 50px; margin-bottom: 10px; }
 
-        #item-info { display: none; padding: 15px; background: rgba(0, 0, 0, 0.9); color: white; border-radius: 8px; margin-bottom: 15px; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        
-        .btn-group { display: flex; gap: 10px; flex-direction: column; }
-        .choice-btns { display: flex; gap: 10px; margin-top: 10px; }
-        button { width: 100%; padding: 15px; border: 4px solid #111; cursor: pointer; font-size: 20px; font-weight: bold; border-radius: 6px; background: #222; color: #fff; transition: 0.2s; }
-        button:hover { background: #444; transform: scale(1.02); }
-        .btn-dice { background: #b71c1c; }
-        .btn-yabawi { background: #0d47a1; }
+        /* [감정 애니메이션용 점] */
+        .dots::after { content: ''; animation: dots 1.5s infinite; }
+        @keyframes dots { 0% { content: ''; } 33% { content: '.'; } 66% { content: '..'; } 100% { content: '...'; } }
+
+        #item-info { display: none; padding: 15px; background: rgba(0, 0, 0, 0.95); color: white; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid var(--gold); }
+        .info-row { display: flex; justify-content: space-between; align-items: center; }
+
+        button { width: 100%; padding: 12px; border: 4px solid #111; cursor: pointer; font-size: 20px; font-weight: bold; border-radius: 6px; background: #222; color: #fff; }
+        button:hover { background: #444; }
 
         /* [야바위 구역] */
-        .game-zone { position: absolute; bottom: 0%; width: 1200px; height: 600px; display: none; justify-content: center; pointer-events: none; }
+        .game-zone { position: absolute; bottom: 0%; width: 1200px; height: 500px; display: none; justify-content: center; pointer-events: none; }
         .cup {
-            position: absolute; bottom: 20px; width: 450px; height: 550px;
+            position: absolute; bottom: 10px; width: 400px; height: 500px;
             background: url('https://github.com/bagjueun307/-/blob/main/%EC%BB%B5%20%EC%97%8E%EC%9D%80%20%ED%98%95%ED%83%9C%20%EC%9D%B4%EB%AF%B8%EC%A7%80.png?raw=true') no-repeat center center;
             background-size: contain; transition: left 0.3s ease, transform 0.4s ease; 
             cursor: pointer; z-index: 10; pointer-events: auto;
         }
-        .cup.lifted {
-            background-image: url('https://github.com/bagjueun307/-/blob/main/%EC%9C%84%EB%A1%9C%20%ED%96%A5%ED%95%9C%20%EC%BB%B5%20%EC%9D%B4%EB%AF%B8%EC%A7%80.png?raw=true') !important;
-            transform: translateY(-280px);
-        }
-        .coin-stack { position: absolute; bottom: 50px; width: 400px; height: 400px; display: none; justify-content: center; z-index: 5; transition: left 0.3s ease; }
-        .pixel-coin { width: 380px; height: 380px; background: url('https://github.com/bagjueun307/-/blob/main/%EC%BD%94%EC%9D%B8%20%EC%9D%B4%EB%AF%B8%EC%A7%80%20%EC%A0%95%EC%B8%A1%EB%A9%B4.png?raw=true') no-repeat center center; background-size: contain; }
+        .cup.lifted { background-image: url('https://github.com/bagjueun307/-/blob/main/%EC%9C%84%EB%A1%9C%20%ED%96%A5%ED%95%9C%20%EC%BB%B5%20%EC%9D%B4%EB%AF%B8%EC%A7%80.png?raw=true') !important; transform: translateY(-250px); }
+        .coin-stack { position: absolute; bottom: 40px; width: 350px; height: 350px; display: none; justify-content: center; z-index: 5; transition: left 0.3s ease; }
+        .pixel-coin { width: 330px; height: 330px; background: url('https://github.com/bagjueun307/-/blob/main/%EC%BD%94%EC%9D%B8%20%EC%9D%B4%EB%AF%B8%EC%A7%80%20%EC%A0%95%EC%B8%A1%EB%A9%B4.png?raw=true') no-repeat center center; background-size: contain; }
 
-        /* [다이스 구역] */
-        .dice-zone { position: absolute; bottom: 10%; display: none; gap: 30px; z-index: 50; }
-        .dice { width: 180px; height: 180px; background: white; border: 6px solid #222; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 80px; font-weight: 900; box-shadow: 0 10px 0 #999; }
-        .dice-betting { 
-            position: absolute; bottom: 42%; background: rgba(0,0,0,0.85); padding: 25px; 
-            border-radius: 15px; color: white; display: none; flex-direction: column; 
-            gap: 15px; z-index: 60; border: 4px solid var(--gold);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        /* [리얼 주사위 구역] - 점(Dot) 스타일 */
+        .dice-zone { position: absolute; bottom: 15%; display: none; gap: 40px; z-index: 50; }
+        .dice {
+            width: 150px; height: 150px; background: #eee; border: 5px solid #222; border-radius: 20px;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+            padding: 15px; box-shadow: inset -10px -10px 0px #ccc, 0 10px 0px #000;
         }
-        .bet-info { text-align:center; font-size: 16px; color: #ddd; line-height: 1.4; }
+        .dot { background: #111; border-radius: 50%; width: 25px; height: 25px; visibility: hidden; align-self: center; justify-self: center; }
+        .dot.visible { visibility: visible; }
+
+        /* [자판 위치 조정] 팝업 아래에 확실히 보이게 */
+        .dice-betting { 
+            position: absolute; top: 260px; background: rgba(0,0,0,0.9); padding: 15px; 
+            border-radius: 12px; color: white; display: none; flex-direction: column; 
+            gap: 10px; z-index: 110; border: 3px solid var(--gold); width: 400px;
+        }
         .bet-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .bet-grid button { padding: 10px; font-size: 18px; }
+        .bet-grid button { padding: 8px; font-size: 16px; background: #444; }
     </style>
 </head>
 <body>
 
     <div class="ui-container">
-        <div class="balance-badge" id="balance-display">보유 코인: 0</div>
-        <div id="dialogue">"환영하네. 감정할 물건이 있다면 테이블에 올려보게."</div>
+        <div class="balance-badge" id="balance-display">코인: 0</div>
+        <div id="dialogue">"어이, 거기. 좋은 물건 있으면 좀 보여달라고."</div>
         
         <div id="item-info">
             <div class="info-row">
-                <span id="tier-kor" style="font-size:28px; font-weight:900;"></span>
-                <span id="stars" style="color:var(--gold); font-size:22px;"></span>
+                <span id="tier-kor" style="font-size:26px; font-weight:900;"></span>
+                <span id="stars" style="color:var(--gold); font-size:20px;"></span>
             </div>
             <div class="info-row">
-                <span id="item-name" style="font-size:24px; font-weight:bold; color:#fff; border-bottom:3px solid var(--gold);"></span>
-                <span style="color:var(--gold); font-size:22px; font-weight:bold;">가치: <span id="item-val"></span> 코인</span>
+                <span id="item-name" style="font-size:22px; font-weight:bold; color:#fff;"></span>
+                <span style="color:var(--gold); font-size:20px;">가치: <span id="item-val"></span></span>
             </div>
         </div>
 
-        <div id="main-btns" class="btn-group">
-            <button onclick="startAppraisal()">물건 꺼내기</button>
+        <div id="main-btns"><button onclick="startAppraisal()">물건 꺼내기</button></div>
+    </div>
+
+    <div class="dice-betting" id="dice-betting">
+        <div style="text-align:center; font-size: 14px; margin-bottom:5px;">두 주사위의 합을 맞추게 (±1은 2배 보상)</div>
+        <div class="bet-grid">
+            <button onclick="betDice(2)">2</button><button onclick="betDice(3)">3</button><button onclick="betDice(4)">4</button><button onclick="betDice(5)">5</button>
+            <button onclick="betDice(6)">6</button><button onclick="betDice(7)">7</button><button onclick="betDice(8)">8</button><button onclick="betDice(9)">9</button>
+            <button onclick="betDice(10)">10</button><button onclick="betDice(11)">11</button><button onclick="betDice(12)">12</button>
         </div>
     </div>
 
@@ -103,67 +113,71 @@
     </div>
 
     <div class="dice-zone" id="dice-zone">
-        <div id="dice-1" class="dice">?</div>
-        <div id="dice-2" class="dice">?</div>
-    </div>
-
-    <div class="dice-betting" id="dice-betting">
-        <div class="bet-info">
-            <b>주사위 2개의 합계 예측</b><br>
-            <span style="color:var(--gold)">정확히 일치: 5배 보상</span><br>
-            <span style="color:#1eff00">차이가 1일 때: 2배 보상</span>
-        </div>
-        <div class="bet-grid">
-            <button onclick="betDice(2)">2</button><button onclick="betDice(3)">3</button><button onclick="betDice(4)">4</button><button onclick="betDice(5)">5</button>
-            <button onclick="betDice(6)">6</button><button onclick="betDice(7)">7</button><button onclick="betDice(8)">8</button><button onclick="betDice(9)">9</button>
-            <button onclick="betDice(10)">10</button><button onclick="betDice(11)">11</button><button onclick="betDice(12)">12</button>
-        </div>
+        <div id="dice-1" class="dice"></div>
+        <div id="dice-2" class="dice"></div>
     </div>
 
 <script>
     let wallet = 0; let playing = false; let coinPos = 1; let currentVal = 0;
     const defaultPositions = ["-100px", "375px", "850px"];
-    const tiers = {
-        LEGENDARY: { kor: "전설 등급", star: "★★★★★", val: 10, msg: "오오... 기적이 일어났군!" },
-        EPIC:      { kor: "에픽 등급", star: "★★★★☆", val: 7, msg: "아주 훌륭한 골동품이야." },
-        RARE:      { kor: "희귀 등급", star: "★★★☆☆", val: 5, msg: "제법 값어치가 나가겠어." },
-        UNCOMMON:  { kor: "상급 등급", star: "★★☆☆☆", val: 3, msg: "나쁘지 않은 물건이야." },
-        COMMON:    { kor: "일반 등급", star: "★☆☆☆☆", val: 1, msg: "흔해 빠진 잡동사니로군." }
+    
+    // 주사위 점 패턴 (1~6)
+    const dicePatterns = {
+        1: [4],
+        2: [0, 8],
+        3: [0, 4, 8],
+        4: [0, 2, 6, 8],
+        5: [0, 2, 4, 6, 8],
+        6: [0, 2, 3, 5, 6, 8]
     };
+
+    function drawDice(id, num) {
+        const diceDiv = document.getElementById(id);
+        diceDiv.innerHTML = ''; 
+        for(let i=0; i<9; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (dicePatterns[num].includes(i) ? ' visible' : '');
+            diceDiv.appendChild(dot);
+        }
+    }
 
     function startAppraisal() {
         if(playing) return;
         initTable();
         const diag = document.getElementById('dialogue');
         document.getElementById('item-info').style.display = 'none';
-        let i = 0;
-        const thoughts = ["어디 보자...", "이 질감... 이 무게...", "오호라, 알겠군!"];
-        const interval = setInterval(() => {
-            if(i < thoughts.length) diag.innerText = thoughts[i++];
-            else { clearInterval(interval); showAppraisalResult(); }
-        }, 500);
+        
+        diag.innerHTML = '감정 중<span class="dots"></span>';
+        
+        setTimeout(() => { diag.innerText = "음... 돋보기 좀 가져와야겠군."; }, 1200);
+        setTimeout(() => { diag.innerText = "이 표식은 분명 그 가문의 것인데..."; }, 2500);
+        setTimeout(() => { showAppraisalResult(); }, 4000);
     }
 
     function showAppraisalResult() {
-        const keys = Object.keys(tiers);
+        const keys = ["LEGENDARY", "EPIC", "RARE", "UNCOMMON", "COMMON"];
         const tierKey = keys[Math.floor(Math.random()*keys.length)];
-        const tier = tiers[tierKey];
+        const tier = {
+            LEGENDARY: { kor: "전설 등급", star: "★★★★★", val: 10, msg: "오 마이 갓! 이건 역사적인 발견이야!" },
+            EPIC: { kor: "에픽 등급", star: "★★★★☆", val: 7, msg: "훌륭해. 아주 깊은 맛이 느껴지는 유물이군." },
+            RARE: { kor: "희귀 등급", star: "★★★☆☆", val: 5, msg: "제법 돈 냄새가 나는 물건이야." },
+            UNCOMMON: { kor: "상급 등급", star: "★★☆☆☆", val: 3, msg: "상태는 좋군. 적당한 가격에 사주지." },
+            COMMON: { kor: "일반 등급", star: "★☆☆☆☆", val: 1, msg: "그냥 잡동사니잖아? 뭐, 좋아." }
+        }[tierKey];
+
         currentVal = tier.val;
-        
-        const tierLabel = document.getElementById('tier-kor');
-        tierLabel.innerText = tier.kor;
-        tierLabel.style.color = `var(--${tierKey.toLowerCase()})`;
-        
+        document.getElementById('tier-kor').innerText = tier.kor;
+        document.getElementById('tier-kor').style.color = `var(--${tierKey.toLowerCase()})`;
         document.getElementById('stars').innerText = tier.star;
-        document.getElementById('item-name').innerText = "의뢰받은 장물";
+        document.getElementById('item-name').innerText = "의뢰받은 물건";
         document.getElementById('item-val').innerText = currentVal;
         document.getElementById('item-info').style.display = 'block';
-        document.getElementById('dialogue').innerText = tier.msg + " 어떤 게임을 하겠나?";
+        document.getElementById('dialogue').innerText = tier.msg;
 
         document.getElementById('main-btns').innerHTML = `
-            <div class="choice-btns">
-                <button class="btn-yabawi" onclick="startGame('yabawi')">야바위 (1배)</button>
-                <button class="btn-dice" onclick="startGame('dice')">주사위 (최대 5배)</button>
+            <div style="display:flex; gap:10px;">
+                <button style="background:#0d47a1" onclick="startGame('yabawi')">야바위 (1배)</button>
+                <button style="background:#b71c1c" onclick="startGame('dice')">주사위 (최대 5배)</button>
             </div>
         `;
     }
@@ -171,103 +185,78 @@
     function startGame(type) {
         if(type === 'yabawi') {
             document.getElementById('yabawi-zone').style.display = 'flex';
-            document.getElementById('dialogue').innerText = "눈을 떼지 말게나!";
-            document.getElementById('main-btns').innerHTML = `<button onclick="yabawiShuffle()">시작</button>`;
+            document.getElementById('main-btns').innerHTML = `<button onclick="yabawiShuffle()">시작!</button>`;
         } else {
             document.getElementById('dice-zone').style.display = 'flex';
             document.getElementById('dice-betting').style.display = 'flex';
-            document.getElementById('dialogue').innerText = "숫자를 하나 고르게.";
             document.getElementById('main-btns').innerHTML = ``;
         }
     }
 
-    // --- 야바위 로직 ---
     function yabawiShuffle() {
         playing = true;
         coinPos = Math.floor(Math.random()*3);
-        document.getElementById(`slot-${coinPos}`).classList.add('lifted');
-        const stack = document.getElementById(`stack-${coinPos}`);
-        stack.style.display = 'flex';
+        const cups = document.querySelectorAll('.cup');
+        cups[coinPos].classList.add('lifted');
+        document.getElementById(`stack-${coinPos}`).style.display = 'flex';
 
         setTimeout(() => {
-            document.getElementById(`slot-${coinPos}`).classList.remove('lifted');
+            cups[coinPos].classList.remove('lifted');
             setTimeout(() => { 
-                stack.style.display = 'none';
-                shuffle(0, 15);
+                document.querySelectorAll('.coin-stack').forEach(s => s.style.display = 'none');
+                shuffleLoop(0, 15);
             }, 600);
-        }, 800);
+        }, 1000);
     }
 
-    function shuffle(count, total) {
-        if(count >= total) {
-            playing = false;
-            document.getElementById('dialogue').innerText = "코인이 든 컵을 골라보게!";
-            return;
-        }
+    function shuffleLoop(count, total) {
+        if(count >= total) { playing = false; document.getElementById('dialogue').innerText = "어디에 들었나?"; return; }
         let a = Math.floor(Math.random()*3), b = Math.floor(Math.random()*3);
         while(a === b) b = Math.floor(Math.random()*3);
         const cupA = document.getElementById(`slot-${a}`), cupB = document.getElementById(`slot-${b}`);
         const stackA = document.getElementById(`stack-${a}`), stackB = document.getElementById(`stack-${b}`);
-        const tempLeft = cupA.style.left;
-        cupA.style.left = cupB.style.left; cupB.style.left = tempLeft;
-        stackA.style.left = stackB.style.left; stackB.style.left = tempLeft;
-        setTimeout(() => shuffle(count + 1, total), 350);
+        const temp = cupA.style.left;
+        cupA.style.left = cupB.style.left; cupB.style.left = temp;
+        stackA.style.left = stackB.style.left; stackB.style.left = temp;
+        setTimeout(() => shuffleLoop(count + 1, total), 320);
     }
 
     function selectCup(id) {
         if(playing) return;
         playing = true;
         document.querySelectorAll('.cup').forEach(c => c.classList.add('lifted'));
-        const answerStack = document.getElementById(`stack-${coinPos}`);
-        answerStack.style.display = 'flex';
-
-        const selectedCup = document.getElementById(`slot-${id}`);
-        if(selectedCup.style.left === answerStack.style.left) {
-            wallet += currentVal;
-            document.getElementById('dialogue').innerText = "정확해! 여기 코인이다.";
-        } else {
-            document.getElementById('dialogue').innerText = "틀렸네. 이건 내가 챙기지.";
-        }
+        document.getElementById(`stack-${coinPos}`).style.display = 'flex';
+        const isMatch = document.getElementById(`slot-${id}`).style.left === document.getElementById(`stack-${coinPos}`).style.left;
+        if(isMatch) { wallet += currentVal; document.getElementById('dialogue').innerText = "맞았어! 운이 좋군."; }
+        else { document.getElementById('dialogue').innerText = "땡! 내 손이 더 빨랐지."; }
         finishGame();
     }
 
-    // --- 주사위 정밀 보상 로직 ---
     function betDice(guess) {
         document.getElementById('dice-betting').style.display = 'none';
-        document.getElementById('dialogue').innerText = "주사위가 구른다...";
-        
-        const d1 = Math.floor(Math.random()*6)+1;
-        const d2 = Math.floor(Math.random()*6)+1;
-        const sum = d1 + d2;
-        const diff = Math.abs(sum - guess); // 편차 계산
-
         let count = 0;
+        const final1 = Math.floor(Math.random()*6)+1, final2 = Math.floor(Math.random()*6)+1;
+        
         const rollInt = setInterval(() => {
-            document.getElementById('dice-1').innerText = Math.floor(Math.random()*6)+1;
-            document.getElementById('dice-2').innerText = Math.floor(Math.random()*6)+1;
-            if(count++ > 12) {
+            drawDice('dice-1', Math.floor(Math.random()*6)+1);
+            drawDice('dice-2', Math.floor(Math.random()*6)+1);
+            if(count++ > 15) {
                 clearInterval(rollInt);
-                document.getElementById('dice-1').innerText = d1;
-                document.getElementById('dice-2').innerText = d2;
-
-                if (diff === 0) {
-                    wallet += currentVal * 5;
-                    document.getElementById('dialogue').innerText = `합계 ${sum}! 완벽해! 5배 보너스(코인 ${currentVal*5}) 획득!`;
-                } else if (diff === 1) {
-                    wallet += currentVal * 2;
-                    document.getElementById('dialogue').innerText = `합계 ${sum}! 아깝구만! 1 차이 보너스로 2배(코인 ${currentVal*2}) 획득!`;
-                } else {
-                    document.getElementById('dialogue').innerText = `합계 ${sum}... 예측값(${guess})과 너무 멀어. 꽝이야!`;
-                }
+                drawDice('dice-1', final1); drawDice('dice-2', final2);
+                const sum = final1 + final2;
+                const diff = Math.abs(sum - guess);
+                if(diff === 0) { wallet += currentVal * 5; document.getElementById('dialogue').innerText = `합계 ${sum}! 퍼펙트! 5배 지급!`; }
+                else if(diff === 1) { wallet += currentVal * 2; document.getElementById('dialogue').innerText = `합계 ${sum}! 근접 보너스! 2배 지급!`; }
+                else { document.getElementById('dialogue').innerText = `합계 ${sum}... 예측값(${guess})과 너무 멀어.`; }
                 finishGame();
             }
         }, 100);
     }
 
     function finishGame() {
-        document.getElementById('balance-display').innerText = `보유 코인: ${wallet}`;
+        document.getElementById('balance-display').innerText = `코인: ${wallet}`;
         setTimeout(() => {
-            document.getElementById('main-btns').innerHTML = `<button onclick="startAppraisal()">다른 물건 꺼내기</button>`;
+            document.getElementById('main-btns').innerHTML = `<button onclick="startAppraisal()">다음 물건 감정하기</button>`;
             playing = false;
         }, 2500);
     }
@@ -276,16 +265,19 @@
         document.getElementById('yabawi-zone').style.display = 'none';
         document.getElementById('dice-zone').style.display = 'none';
         document.getElementById('dice-betting').style.display = 'none';
-        document.querySelectorAll('.cup').forEach((c, i) => {
-            c.classList.remove('lifted');
-            c.style.left = defaultPositions[i];
+        const cups = document.querySelectorAll('.cup');
+        const stacks = document.querySelectorAll('.coin-stack');
+        cups.forEach((c, i) => {
+            c.style.transition = 'none'; c.classList.remove('lifted');
+            c.style.left = defaultPositions[i]; void c.offsetWidth;
+            c.style.transition = 'left 0.3s ease, transform 0.4s ease';
         });
-        document.querySelectorAll('.coin-stack').forEach((s, i) => {
-            s.style.display = 'none';
-            s.style.left = defaultPositions[i];
+        stacks.forEach((s, i) => {
+            s.style.transition = 'none'; s.style.display = 'none';
+            s.style.left = defaultPositions[i]; void s.offsetWidth;
+            s.style.transition = 'left 0.3s ease';
         });
-        document.getElementById('dice-1').innerText = '?';
-        document.getElementById('dice-2').innerText = '?';
+        drawDice('dice-1', 1); drawDice('dice-2', 1);
     }
 </script>
 </body>
