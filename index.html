@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Black Market Pawn Shop - Tier System</title>
+    <title>Black Market Pawn Shop</title>
     <style>
         :root { 
             --gold: #ffd700; --legendary: #ff8000; --epic: #a335ee; 
@@ -16,11 +16,14 @@
             background-size: cover; display: flex; flex-direction: column; align-items: center; overflow: hidden;
         }
 
-        /* UI 레이아웃 - 가독성 중심 */
+        /* [디자인] 반투명 UI 및 가독성 강화 */
         .ui-container {
             position: absolute; top: 40px; width: 620px;
-            background: #fdfdfd; border: 6px solid #222; padding: 25px; color: #111;
+            background: rgba(253, 253, 253, 0.85); 
+            backdrop-filter: blur(10px);
+            border: 6px solid #222; padding: 25px; color: #111;
             box-shadow: 20px 20px 0px rgba(0,0,0,0.5); z-index: 100;
+            border-radius: 10px;
         }
 
         .balance-badge {
@@ -30,50 +33,52 @@
             transform: rotate(3deg); box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
         }
 
-        #dialogue { font-size: 22px; font-weight: 700; min-height: 65px; display: flex; align-items: center; line-height: 1.3; }
+        #dialogue { font-size: 22px; font-weight: 700; min-height: 65px; display: flex; align-items: center; }
 
-        /* [핵심] 등급이 아주 잘 보이게 디자인된 정보창 */
+        /* [핵심] 한글 등급 및 별점 표시창 */
         #item-info { 
-            margin-top: 15px; padding: 20px; background: #1a1a1a; color: white;
-            border: 4px solid #333; display: none; text-align: center;
+            margin-top: 15px; padding: 20px; background: rgba(0, 0, 0, 0.9); color: white;
+            border: 4px solid #444; display: none; text-align: center; border-radius: 8px;
         }
         
-        .tier-display {
-            font-size: 42px; font-weight: 900; letter-spacing: 4px;
-            margin-bottom: 10px; text-shadow: 2px 2px 0px #000;
-            display: block;
-        }
+        .tier-korean { font-size: 48px; font-weight: 900; margin-bottom: 5px; display: block; }
+        .star-rating { font-size: 28px; color: var(--gold); margin-bottom: 15px; letter-spacing: 5px; }
 
-        .item-name-line { font-size: 20px; color: #ccc; margin-bottom: 5px; }
-        .value-line { font-size: 24px; font-weight: bold; color: var(--gold); }
+        .item-detail { font-size: 18px; color: #bbb; margin-bottom: 5px; }
+        .value-text { font-size: 24px; font-weight: bold; color: var(--gold); }
 
         .btn-group { margin-top: 20px; display: flex; gap: 15px; }
-        button { flex: 1; padding: 15px; border: 4px solid #111; cursor: pointer; font-size: 20px; font-weight: bold; transition: 0.1s; }
+        button { flex: 1; padding: 15px; border: 4px solid #111; cursor: pointer; font-size: 20px; font-weight: bold; border-radius: 5px; }
         .btn-accept { background: #222; color: #fff; }
-        .btn-accept:hover { background: #444; }
 
-        /* 야바위 구역 & 거대 코인 */
-        .game-zone { position: absolute; bottom: 8%; width: 1050px; height: 500px; display: flex; justify-content: center; gap: 40px; }
-        .slot-container { position: relative; width: 320px; }
+        /* 야바위 구역 */
+        .game-zone { 
+            position: absolute; bottom: 8%; width: 1000px; height: 450px; 
+            display: flex; justify-content: center;
+        }
 
         .cup {
             position: absolute; bottom: 0; width: 320px; height: 380px;
             background: url('https://github.com/bagjueun307/-/blob/main/%EC%BB%B5%20%EC%97%8E%EC%9D%80%20%ED%98%95%ED%83%9C%20%EC%9D%B4%EB%AF%B8%EC%A7%80.png?raw=true') no-repeat center center;
-            background-size: contain; transition: transform 0.4s ease, left 0.5s ease; cursor: pointer; z-index: 10;
+            background-size: contain; 
+            transition: left 0.35s ease-in-out, transform 0.4s ease; 
+            cursor: pointer; z-index: 10;
         }
+
         .cup.lifted {
             background-image: url('https://github.com/bagjueun307/-/blob/main/%EC%9C%84%EB%A1%9C%20%ED%96%A5%ED%95%9C%20%EC%BB%B5%20%EC%9D%B4%EB%AF%B8%EC%A7%80.png?raw=true');
             transform: translateY(-220px);
         }
 
         .coin-stack { 
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 30px; 
             width: 280px; height: 280px; display: none; justify-content: center; z-index: 5;
+            transition: left 0.35s ease-in-out;
         }
         .coin-stack.visible { display: flex; }
         
         .pixel-coin {
-            position: absolute; width: 260px; height: 260px;
+            width: 260px; height: 260px;
             background: url('https://github.com/bagjueun307/-/blob/main/%EC%BD%94%EC%9D%B8%20%EC%9D%B4%EB%AF%B8%EC%A7%80%20%EC%A0%95%EC%B8%A1%EB%A9%B4.png?raw=true') no-repeat center center;
             background-size: contain;
         }
@@ -82,39 +87,45 @@
 <body>
 
     <div class="ui-container">
-        <div class="balance-badge" id="balance-display">코인: 0</div>
-        <div style="font-size: 12px; color: #888; border-bottom: 1px solid #ddd; margin-bottom: 10px; font-weight: bold;">[ 암시장 정밀 판독기 v2.5 ]</div>
-        <div id="dialogue">"물건 가져와봐. 가치에 따라 판돈이 달라지니까."</div>
+        <div class="balance-badge" id="balance-display">보유 코인: 0</div>
+        <div style="font-size: 12px; color: #444; border-bottom: 1px solid #aaa; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px;">암시장 물건 판독서</div>
+        <div id="dialogue">"어이, 물건 좀 꺼내보라고. 가치에 따라 판돈이 결정되니까."</div>
         
         <div id="item-info">
-            <div id="tier-name" class="tier-display">COMMON</div>
-            <div class="item-name-line">품명: <span id="item-name"></span></div>
-            <div class="value-line">가치: <span id="item-val"></span> 코인</div>
+            <div id="tier-kor" class="tier-korean">전설 등급</div>
+            <div id="stars" class="star-rating">★★★★★</div>
+            <div class="item-detail">감정 물건: <span id="item-name"></span></div>
+            <div class="value-text">예상 수익: <span id="item-val"></span> 코인</div>
         </div>
 
         <div class="btn-group">
-            <button id="btn-main" class="btn-accept" onclick="startAppraisal()">물건 감정하기</button>
+            <button id="btn-main" class="btn-accept" onclick="startAppraisal()">물건 꺼내기</button>
         </div>
     </div>
 
     <div class="game-zone">
-        <div class="slot-container" id="cont-0"><div id="slot-0" class="cup" onclick="select(0)"></div><div id="stack-0" class="coin-stack"></div></div>
-        <div class="slot-container" id="cont-1"><div id="slot-1" class="cup" onclick="select(1)"></div><div id="stack-1" class="coin-stack"></div></div>
-        <div class="slot-container" id="cont-2"><div id="slot-2" class="cup" onclick="select(2)"></div><div id="stack-2" class="coin-stack"></div></div>
+        <div id="slot-0" class="cup" style="left: 0px;" onclick="select(0)"></div>
+        <div id="slot-1" class="cup" style="left: 340px;" onclick="select(1)"></div>
+        <div id="slot-2" class="cup" style="left: 680px;" onclick="select(2)"></div>
+        
+        <div id="stack-0" class="coin-stack" style="left: 0px;"><div class="pixel-coin"></div></div>
+        <div id="stack-1" class="coin-stack" style="left: 340px;"><div class="pixel-coin"></div></div>
+        <div id="stack-2" class="coin-stack" style="left: 680px;"><div class="pixel-coin"></div></div>
     </div>
 
 <script>
     let wallet = 0; let playing = false; let finished = true; let coinPos = 1; let currentVal = 0;
 
+    // [변경] 한글 등급명과 별점 매핑 (최소 1개 ~ 최대 5개)
     const tiers = {
-        LEGENDARY: { name: "LEGENDARY", kor: "전설급 보물", color: "#ff8000", value: 500 },
-        EPIC:      { name: "EPIC", kor: "에픽급 유물", color: "#a335ee", value: 200 },
-        RARE:      { name: "RARE", kor: "희귀한 장물", color: "#0070dd", value: 100 },
-        UNCOMMON:  { name: "UNCOMMON", kor: "쓸만한 물건", color: "#1eff00", value: 50 },
-        COMMON:    { name: "COMMON", kor: "평범한 분실물", color: "#9d9d9d", value: 10 }
+        LEGENDARY: { kor: "전설 등급", stars: "★★★★★", color: "#ff8000", value: 10, msg: "세상에... 이건 전설의 보물이잖아!" },
+        EPIC:      { kor: "에픽 등급", stars: "★★★★☆", color: "#a335ee", value: 7, msg: "오호, 암시장에서나 보던 귀한 물건이군." },
+        RARE:      { kor: "희귀 등급", stars: "★★★☆☆", color: "#0070dd", value: 5, msg: "제법 돈이 되겠어. 희귀한 물건이야." },
+        UNCOMMON:  { kor: "상급 등급", stars: "★★☆☆☆", color: "#1eff00", value: 3, msg: "나쁘지 않네. 쓸만한 물건이야." },
+        COMMON:    { kor: "일반 등급", stars: "★☆☆☆☆", color: "#9d9d9d", value: 1, msg: "흥, 어디서나 볼 수 있는 흔한 장물이군." }
     };
 
-    const itemList = ["잃어버린 가방", "수상한 상자", "금박 시계", "골동품 항아리", "왕의 인장", "빛나는 원석"];
+    const itemList = ["낡은 장부", "녹슨 메달", "누군가의 사진", "수상한 병", "먼지 쌓인 반지"];
 
     function startAppraisal() {
         if(playing) return;
@@ -131,85 +142,89 @@
 
     function finishAppraisal() {
         const rand = Math.random();
-        let tierKey = "COMMON";
-        if(rand < 0.05) tierKey = "LEGENDARY";
-        else if(rand < 0.15) tierKey = "EPIC";
-        else if(rand < 0.35) tierKey = "RARE";
-        else if(rand < 0.65) tierKey = "UNCOMMON";
-
+        let tierKey = (rand < 0.05) ? "LEGENDARY" : (rand < 0.15) ? "EPIC" : (rand < 0.35) ? "RARE" : (rand < 0.65) ? "UNCOMMON" : "COMMON";
         const tier = tiers[tierKey];
         currentVal = tier.value;
         
         const info = document.getElementById('item-info');
-        const tierName = document.getElementById('tier-name');
-        
-        info.style.display = 'block';
-        tierName.innerText = tier.name;
-        tierName.style.color = tier.color;
+        document.getElementById('tier-kor').innerText = tier.kor;
+        document.getElementById('tier-kor').style.color = tier.color;
+        document.getElementById('stars').innerText = tier.stars;
         
         document.getElementById('item-name').innerText = itemList[Math.floor(Math.random()*itemList.length)];
         document.getElementById('item-val').innerText = currentVal;
-        document.getElementById('dialogue').innerText = `"${tier.kor}이구만! 눈 크게 뜨고 잘 보라고."`;
+        info.style.display = 'block';
         
+        document.getElementById('dialogue').innerText = `"${tier.msg}"`;
         const btn = document.getElementById('btn-main');
-        btn.innerText = "야바위 수락";
+        btn.innerText = "야바위 수락 (도전)";
         btn.onclick = startShuffle;
     }
 
     function startShuffle() {
         playing = true; finished = false;
-        document.querySelectorAll('.coin-stack').forEach(s => { s.classList.remove('visible'); s.innerHTML = ''; });
+        document.querySelectorAll('.coin-stack').forEach(s => s.classList.remove('visible'));
         
         coinPos = Math.floor(Math.random()*3);
-        const targetStack = document.getElementById(`stack-${coinPos}`);
-        
-        // 코인 쌓기 연출
-        const stackSize = Math.max(1, Math.ceil(currentVal / 80));
-        for(let i=0; i<stackSize; i++) {
-            const c = document.createElement('div');
-            c.className = 'pixel-coin';
-            c.style.bottom = (i * 20) + 'px';
-            targetStack.appendChild(c);
-        }
-
         document.getElementById(`slot-${coinPos}`).classList.add('lifted');
-        targetStack.classList.add('visible');
+        document.getElementById(`stack-${coinPos}`).classList.add('visible');
 
         setTimeout(() => {
             document.getElementById(`slot-${coinPos}`).classList.remove('lifted');
             setTimeout(() => { 
-                targetStack.classList.remove('visible');
-                // 실제 셔플 로직은 기존과 동일 (간략화된 버전)
-                performShuffle(0, 10, 0.4);
+                document.getElementById(`stack-${coinPos}`).classList.remove('visible');
+                performShuffle(0, 15); // 15번 섞기
             }, 600);
         }, 1000);
     }
 
-    // 셔플 및 선택 로직 (이전과 동일하게 유지)
-    function performShuffle(count, total, speed) {
-        if(count >= total) { playing = false; document.getElementById('dialogue').innerText = "자... 어디에 들었지? 골라봐."; return; }
-        let a = Math.floor(Math.random()*3); let b = Math.floor(Math.random()*3);
+    function performShuffle(count, total) {
+        if(count >= total) {
+            playing = false;
+            document.getElementById('dialogue').innerText = "자... 어디에 들었지? (컵을 클릭해!)";
+            return;
+        }
+
+        let a = Math.floor(Math.random()*3);
+        let b = Math.floor(Math.random()*3);
         while(a === b) b = Math.floor(Math.random()*3);
-        // ... (간략화를 위해 생략되나 실제로는 컵 이동 로직 포함)
-        setTimeout(() => performShuffle(count + 1, total, speed), speed * 1000);
+
+        const cupA = document.getElementById(`slot-${a}`);
+        const cupB = document.getElementById(`slot-${b}`);
+        const stackA = document.getElementById(`stack-${a}`);
+        const stackB = document.getElementById(`stack-${b}`);
+
+        const tempLeft = cupA.style.left;
+        cupA.style.left = cupB.style.left;
+        cupB.style.left = tempLeft;
+        stackA.style.left = stackB.style.left;
+        stackB.style.left = tempLeft;
+
+        setTimeout(() => performShuffle(count + 1, total), 350);
     }
 
     function select(id) {
         if(playing || finished) return;
         finished = true;
-        for(let i=0; i<3; i++) {
-            document.getElementById(`slot-${i}`).classList.add('lifted');
-            if(i === coinPos) document.getElementById(`stack-${i}`).classList.add('visible');
-        }
-        if(id === coinPos) {
+        
+        for(let i=0; i<3; i++) document.getElementById(`slot-${i}`).classList.add('lifted');
+        document.getElementById(`stack-${coinPos}`).classList.add('visible');
+
+        // 코인 위치 추적 로직 (컵의 위치를 확인하여 정답 체크)
+        // 현재 선택한 id 컵의 left 값이 정답 stack의 left 값과 같은지 확인
+        const selectedCupLeft = document.getElementById(`slot-${id}`).style.left;
+        const answerStackLeft = document.getElementById(`stack-${coinPos}`).style.left;
+
+        if(selectedCupLeft === answerStackLeft) {
             wallet += currentVal;
-            document.getElementById('dialogue').innerText = "호오... 이걸 맞추네? 운이 좋았어.";
+            document.getElementById('dialogue').innerText = "호오... 눈썰미가 보통이 아니구만! 여기 코인 받게.";
         } else {
-            document.getElementById('dialogue').innerText = "땡! 이건 이제 내 거야.";
+            document.getElementById('dialogue').innerText = "땡! 아쉽구만. 다음번에 다시 오게나.";
         }
-        document.getElementById('balance-display').innerText = `코인: ${wallet}`;
+
+        document.getElementById('balance-display').innerText = `보유 코인: ${wallet}`;
         setTimeout(() => {
-            document.getElementById('btn-main').innerText = "다른 물건 감정";
+            document.getElementById('btn-main').innerText = "다른 물건 가져오기";
             document.getElementById('btn-main').onclick = startAppraisal;
         }, 2000);
     }
